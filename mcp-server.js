@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
- import {
+import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
   McpError,
@@ -16,18 +16,12 @@ import { weatherTool } from './tools/weatherTool.js';
 import { handleSummarizeEmail } from './tools/summarizeTool.js';
 import { checkApiKey } from './utils/auth.js';
 
-// Setup __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Create Express app
 const app = express();
 app.use(express.json());
 
-// Serve public manifest
-app.use('/.well-known', express.static(path.join(__dirname, 'public/.well-known')));
-
-// MCP server instance with tools
 const mcpServer = new Server(
   {
     name: 'weather-mcp',
@@ -66,12 +60,10 @@ const mcpServer = new Server(
   }
 );
 
-// Register tool list handler (required)
 mcpServer.setRequestHandler(ListToolsRequestSchema, async () => ({
   tool_ids: ['weatherTool', 'summarize_email']
 }));
 
-// Register tool call handler (spec-compliant)
 mcpServer.setRequestHandler(CallToolRequestSchema, async ({ tool, parameters }, req) => {
   const selectedTool = mcpServer.capabilities.tools[tool];
   if (!selectedTool) {
@@ -81,10 +73,10 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async ({ tool, parameters }, 
   return { output: result };
 });
 
-// 🔁 MCP-compliant request routing via Express
+// ✅ Use `.handle()` – it is available
 app.post('/', async (req, res) => {
   try {
-    const result = await mcpServer.receive(req.body, req); // ✅ correct method
+    const result = await mcpServer.handle(req.body, req); // ✅
     res.json(result);
   } catch (err) {
     console.error('❌ MCP server error:', err);
@@ -92,7 +84,6 @@ app.post('/', async (req, res) => {
   }
 });
 
-// Start the server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`✅ MCP server running at http://localhost:${PORT}/`);
