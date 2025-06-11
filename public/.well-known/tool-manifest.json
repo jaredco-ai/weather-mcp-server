@@ -1,0 +1,28 @@
+{
+    "tools": [
+      {
+        "name": "weatherTool",
+        "description": "Provides current weather, forecasts, and timing for rain/sun events based on location and date.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string",
+              "description": "City name or ZIP/postal code"
+            },
+            "date": {
+              "type": "string",
+              "format": "date",
+              "description": "Target date (YYYY-MM-DD)"
+            },
+            "query_type": {
+              "type": "string",
+              "enum": ["current", "forecast", "multi_day", "sunrise_sunset", "rain_check"],
+              "description": "The type of weather query to run"
+            }
+          },
+          "required": ["location", "query_type"]
+        }
+      }
+    ]
+  }
