@@ -1,18 +1,29 @@
-// mcp-server.js
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { Server, HttpServerTransport } from './local-sdk/server/index.mjs';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from './local-sdk/types/index.mjs';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { checkApiKey } from './utils/auth.js';
 import { weatherTool } from './tools/weatherTool.js';
 import { handleSummarizeEmail } from './tools/summarizeTool.js';
 
-const server = new Server(
+// Setup Express app
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const app = express();
+
+// Serve /.well-known/tool-manifest.json
+app.use('/.well-known', express.static(path.join(__dirname, 'public/.well-known')));
+
+// Create MCP server instance
+const mcpServer = new Server(
   {
     name: 'weather-mcp',
     version: '0.0.1',
@@ -49,31 +60,15 @@ const server = new Server(
   }
 );
 
-// List available tools
-server.setRequestHandler(ListToolsRequestSchema, async () => {
+// Register ListTools handler
+mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tool_ids: ['weatherTool', 'summarize_email'],
   };
 });
 
+// Use Express adapter to bridge HTTP → MCP
 const PORT = process.env.PORT || 3000;
-new HttpServerTransport({ port: PORT }).attachTo(server);
+new HttpServerTransport({ port: PORT, expressApp: app }).attachTo(mcpServer);
 
-// Keep alive
-setInterval(() => {}, 1 << 30);
-
-
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Setup static server for /.well-known/ manifest
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const manifestApp = express();
-manifestApp.use('/.well-known', express.static(path.join(__dirname, 'public/.well-known')));
-
-manifestApp.listen(3100, () => {
-  console.log("Manifest server available at http://localhost:3100/.well-known/tool-manifest.json");
-});
+console.log(`✅ Server running on port ${PORT}`);
