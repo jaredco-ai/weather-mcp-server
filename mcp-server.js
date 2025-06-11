@@ -1,29 +1,33 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
-dotenv.config();
-
+// mcp-server.js
 import { Server, HttpServerTransport } from './local-sdk/server/index.mjs';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from './local-sdk/types/index.mjs';
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { checkApiKey } from './utils/auth.js';
 import { weatherTool } from './tools/weatherTool.js';
 import { handleSummarizeEmail } from './tools/summarizeTool.js';
 
-// Setup Express app
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get __dirname in ES module scope
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Express app to serve the manifest and forward requests
 const app = express();
 
-// Serve /.well-known/tool-manifest.json
+// Serve the tool manifest
 app.use('/.well-known', express.static(path.join(__dirname, 'public/.well-known')));
 
-// Create MCP server instance
-const mcpServer = new Server(
+// Start MCP server on the same port
+const server = new Server(
   {
     name: 'weather-mcp',
     version: '0.0.1',
@@ -60,15 +64,17 @@ const mcpServer = new Server(
   }
 );
 
-// Register ListTools handler
-mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
+server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tool_ids: ['weatherTool', 'summarize_email'],
   };
 });
 
-// Use Express adapter to bridge HTTP → MCP
 const PORT = process.env.PORT || 3000;
-new HttpServerTransport({ port: PORT, expressApp: app }).attachTo(mcpServer);
 
-console.log(`✅ Server running on port ${PORT}`);
+// Start Express + MCP server
+app.listen(PORT, () => {
+  console.log(`✅ Server + Manifest available at http://localhost:${PORT}/`);
+});
+
+new HttpServerTransport({ port: PORT }).attachTo(server);
