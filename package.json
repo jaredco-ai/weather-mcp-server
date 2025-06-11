@@ -5,6 +5,7 @@
     "start": "node mcp-server.js"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "node-fetch": "^3.3.2"

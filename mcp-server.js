@@ -4,32 +4,36 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { Server } from './local-sdk/server/index.mjs';
+import {
+  Server,
+  StdioServerTransport
+} from '@modelcontextprotocol/sdk/server/index.js';
+
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-} from './local-sdk/types/index.mjs';
+  ErrorCode,
+  McpError
+} from '@modelcontextprotocol/sdk/types.js';
 
-import { checkApiKey } from './utils/auth.js';
 import { weatherTool } from './tools/weatherTool.js';
 import { handleSummarizeEmail } from './tools/summarizeTool.js';
+import { checkApiKey } from './utils/auth.js';
 
-// Setup __dirname in ES modules
+// Setup __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize Express app
 const app = express();
-
-// Serve the tool manifest
+app.use(express.json());
 app.use('/.well-known', express.static(path.join(__dirname, 'public/.well-known')));
 
-// Parse JSON bodies for incoming requests
-app.use(express.json());
-
-// Init MCP server and route requests through Express
+// 🌐 Use official MCP SDK
 const mcpServer = new Server(
-  { name: 'weather-mcp', version: '0.0.1' },
+  {
+    name: 'weather-mcp',
+    version: '0.0.1'
+  },
   {
     capabilities: {
       tools: {
@@ -37,39 +41,51 @@ const mcpServer = new Server(
           description: weatherTool.description,
           inputSchema: weatherTool.inputSchema,
           outputSchema: weatherTool.outputSchema,
-          handler: (input, request) => weatherTool.run(input, request, { checkApiKey }),
+          handler: async (input, req) =>
+            weatherTool.run(input, req, { checkApiKey })
         },
         summarize_email: {
           description: 'Summarizes an email into one sentence',
           inputSchema: {
             type: 'object',
             properties: {
-              emailText: { type: 'string' },
+              emailText: { type: 'string' }
             },
-            required: ['emailText'],
+            required: ['emailText']
           },
           outputSchema: {
             type: 'object',
             properties: {
-              summary: { type: 'string' },
+              summary: { type: 'string' }
             },
-            required: ['summary'],
+            required: ['summary']
           },
-          handler: handleSummarizeEmail,
-        },
-      },
+          handler: handleSummarizeEmail
+        }
+      }
     }
   }
 );
 
+// 📦 Set request handlers per spec
 mcpServer.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tool_ids: ['weatherTool', 'summarize_email'],
+  tool_ids: ['weatherTool', 'summarize_email']
 }));
 
-// Bind Express to MCP
+mcpServer.setRequestHandler(CallToolRequestSchema, async ({ tool, parameters }, req) => {
+  const selectedTool = mcpServer.capabilities.tools[tool];
+  if (!selectedTool) {
+    throw new McpError(ErrorCode.NOT_FOUND, `Tool not found: ${tool}`);
+  }
+
+  const result = await selectedTool.handler(parameters, req);
+  return { output: result };
+});
+
+// 🔁 Route all POST requests through MCP handler
 app.post('/', async (req, res) => {
   try {
-    const result = await mcpServer.handle(req.body);
+    const result = await mcpServer.handle(req.body, req);
     res.json(result);
   } catch (err) {
     console.error('❌ MCP server error:', err);
@@ -77,8 +93,7 @@ app.post('/', async (req, res) => {
   }
 });
 
-// Start the server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`✅ Server + Manifest running at http://localhost:${PORT}/`);
+  console.log(`✅ MCP server running at http://localhost:${PORT}/`);
 });
