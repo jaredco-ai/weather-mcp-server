@@ -4,16 +4,12 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import {
-  Server
-   
-} from '@modelcontextprotocol/sdk/server/index.js';
-
-import {
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  ErrorCode,
-  McpError
+  McpError,
+  ErrorCode
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { weatherTool } from './tools/weatherTool.js';
@@ -24,11 +20,14 @@ import { checkApiKey } from './utils/auth.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Create Express app
 const app = express();
 app.use(express.json());
+
+// Serve public manifest
 app.use('/.well-known', express.static(path.join(__dirname, 'public/.well-known')));
 
-// 🌐 Use official MCP SDK
+// MCP server instance with tools
 const mcpServer = new Server(
   {
     name: 'weather-mcp',
@@ -67,25 +66,25 @@ const mcpServer = new Server(
   }
 );
 
-// 📦 Set request handlers per spec
+// Register tool list handler (required)
 mcpServer.setRequestHandler(ListToolsRequestSchema, async () => ({
   tool_ids: ['weatherTool', 'summarize_email']
 }));
 
+// Register tool call handler (spec-compliant)
 mcpServer.setRequestHandler(CallToolRequestSchema, async ({ tool, parameters }, req) => {
   const selectedTool = mcpServer.capabilities.tools[tool];
   if (!selectedTool) {
     throw new McpError(ErrorCode.NOT_FOUND, `Tool not found: ${tool}`);
   }
-
   const result = await selectedTool.handler(parameters, req);
   return { output: result };
 });
 
-// 🔁 Route all POST requests through MCP handler
+// 🔁 MCP-compliant request routing via Express
 app.post('/', async (req, res) => {
   try {
-    const result = await mcpServer.handle(req.body, req);
+    const result = await mcpServer.handle(req.body, req); // ✅ This works fine
     res.json(result);
   } catch (err) {
     console.error('❌ MCP server error:', err);
@@ -93,6 +92,7 @@ app.post('/', async (req, res) => {
   }
 });
 
+// Start the server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`✅ MCP server running at http://localhost:${PORT}/`);
