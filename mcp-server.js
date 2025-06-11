@@ -1,37 +1,35 @@
-// mcp-server.js
-import { Server, HttpServerTransport } from './local-sdk/server/index.mjs';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+dotenv.config();
+
+import { Server } from './local-sdk/server/index.mjs';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from './local-sdk/types/index.mjs';
 
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { checkApiKey } from './utils/auth.js';
 import { weatherTool } from './tools/weatherTool.js';
 import { handleSummarizeEmail } from './tools/summarizeTool.js';
 
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Get __dirname in ES module scope
+// Setup __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Express app to serve the manifest and forward requests
+// Initialize Express app
 const app = express();
 
 // Serve the tool manifest
 app.use('/.well-known', express.static(path.join(__dirname, 'public/.well-known')));
 
-// Start MCP server on the same port
-const server = new Server(
-  {
-    name: 'weather-mcp',
-    version: '0.0.1',
-  },
+// Parse JSON bodies for incoming requests
+app.use(express.json());
+
+// Init MCP server and route requests through Express
+const mcpServer = new Server(
+  { name: 'weather-mcp', version: '0.0.1' },
   {
     capabilities: {
       tools: {
@@ -60,21 +58,27 @@ const server = new Server(
           handler: handleSummarizeEmail,
         },
       },
-    },
+    }
   }
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tool_ids: ['weatherTool', 'summarize_email'],
-  };
+mcpServer.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tool_ids: ['weatherTool', 'summarize_email'],
+}));
+
+// Bind Express to MCP
+app.post('/', async (req, res) => {
+  try {
+    const result = await mcpServer.handle(req.body);
+    res.json(result);
+  } catch (err) {
+    console.error('❌ MCP server error:', err);
+    res.status(500).json({ error: 'Server error', details: err.message });
+  }
 });
 
-const PORT = process.env.PORT || 3000;
-
-// Start Express + MCP server
+// Start the server
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`✅ Server + Manifest available at http://localhost:${PORT}/`);
+  console.log(`✅ Server + Manifest running at http://localhost:${PORT}/`);
 });
-
-new HttpServerTransport({ port: PORT }).attachTo(server);
