@@ -148,7 +148,7 @@ export const weatherTool = new Tool({
       visibility: { type: 'number', description: 'Visibility in miles' },
       pressure: { type: 'number', description: 'Atmospheric pressure (mb)' },
       cloud_cover: { type: 'number', description: 'Cloud cover %' },
-      dew_point: { type: 'number', description: 'Dew point in °F' },
+      dew_point: { type:  ['number', 'null'], description: 'Dew point in °F' },
       moonrise: { type: 'string', description: 'Time of moonrise' },
       moonset: { type: 'string', description: 'Time of moonset' },
       moon_phase: { type: 'string', description: 'Phase of the moon' },

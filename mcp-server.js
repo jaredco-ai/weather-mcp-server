@@ -56,15 +56,26 @@ app.post('/', async (req, res) => {
             if (toolName !== 'weatherTool') {
               throw new Error(`Tool not found: ${toolName}`);
             }
-            
+
             const result = await weatherTool.run(body.params.arguments);
+            
+            const cleanOutput = Object.fromEntries(
+              Object.entries(result).filter(([_, v]) => v !== null)
+            );
+
+            console.log('[MCP] Responding with structured output:', {
+              toolUseId: body.id,
+              isFinal: true,
+              output: cleanOutput
+            });
+           
             res.json({
               jsonrpc: '2.0',
               id: body.id,
               result: {
                 toolUseId: body.id,
                 isFinal: true,
-                output: result
+                output: cleanOutput
               }
             });
           } catch (error) {
@@ -110,8 +121,14 @@ app.post('/', async (req, res) => {
     }
     
     const result = await weatherTool.run(parameters);
-    console.log('🌦 Weather result:', result);
-    res.json(result);
+
+    const cleanOutput = Object.fromEntries(
+      Object.entries(result).filter(([_, v]) => v !== null)
+    );
+
+
+    console.log('🌦 Weather result:', cleanOutput);
+    res.json(cleanOutput);
     
   } catch (error) {
     console.error('❌ Error:', error);
