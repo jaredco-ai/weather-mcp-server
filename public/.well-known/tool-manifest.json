@@ -13,15 +13,69 @@
             "date": {
               "type": "string",
               "format": "date",
-              "description": "Target date (YYYY-MM-DD)"
+              "description": "Target date (YYYY-MM-DD). Required for 'forecast', 'sunrise_sunset', or 'rain_check'"
             },
             "query_type": {
               "type": "string",
               "enum": ["current", "forecast", "multi_day", "sunrise_sunset", "rain_check"],
               "description": "The type of weather query to run"
+            },
+            "num_days": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 14,
+              "description": "Number of days to return (only used with 'multi_day')"
             }
           },
           "required": ["location", "query_type"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "summary": { "type": "string" },
+            "temp_high": { "type": "number" },
+            "temp_low": { "type": "number" },
+            "precip_chance": { "type": "number" },
+            "condition": { "type": "string" },
+            "wind": { "type": "string" },
+            "sunrise": { "type": "string" },
+            "sunset": { "type": "string" },
+            "forecast": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "day": { "type": "string" },
+                  "high": { "type": "number" },
+                  "low": { "type": "number" },
+                  "condition": { "type": "string" }
+                }
+              }
+            },
+            "feels_like": { "type": "number" },
+            "humidity": { "type": "number" },
+            "uv_index": { "type": "number" },
+            "visibility": { "type": "number" },
+            "pressure": { "type": "number" },
+            "cloud_cover": { "type": "number" },
+            "dew_point": { "type": "number" },
+            "moonrise": { "type": "string" },
+            "moonset": { "type": "string" },
+            "moon_phase": { "type": "string" },
+            "will_rain": { "type": "boolean" },
+            "rain_start": { "type": "string" },
+            "rain_end": { "type": "string" },
+            "units": {
+                "type": "object",
+                "description": "Units used in the returned weather data",
+                "properties": {
+                    "temperature": { "type": "string", "description": "Temperature unit (e.g., °F, °C)" },
+                    "distance": { "type": "string", "description": "Distance unit (e.g., miles, km)" },
+                    "speed": { "type": "string", "description": "Speed unit (e.g., mph, km/h)" },
+                    "pressure": { "type": "string", "description": "Pressure unit (e.g., mb, hPa)" }
+                }
+             }
+          }
         }
       }
     ]

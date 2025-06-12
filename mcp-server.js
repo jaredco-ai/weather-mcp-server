@@ -43,6 +43,7 @@ app.post('/', async (req, res) => {
                   name: 'weatherTool',
                   description: weatherTool.description,
                   inputSchema: weatherTool.inputSchema,
+                  outputSchema: weatherTool.outputSchema
                 },
               ],
             },

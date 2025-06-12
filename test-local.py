@@ -63,4 +63,4 @@ def call_weather_tool_with_openai(question):
     print(result.json())
 
 # Example call
-call_weather_tool_with_openai("Give me a 5-day forecast for New York")
+call_weather_tool_with_openai("Give me current weather  for New York")

@@ -83,7 +83,22 @@ async function fetchWeatherData({ location, date, query_type, num_days = 3 }) {
         temp_high: parseFloat(current.temp_F),
         temp_low: parseFloat(current.temp_F),
         condition: current.weatherDesc[0].value,
-        wind: `${current.windspeedMiles} mph ${current.winddir16Point}`
+        wind: `${current.windspeedMiles} mph ${current.winddir16Point}`,
+        feels_like: parseFloat(current.FeelsLikeF),
+        humidity: parseInt(current.humidity),
+        uv_index: parseInt(current.uvIndex),
+        visibility: parseFloat(current.visibility),
+        pressure: parseFloat(current.pressure),
+        cloud_cover: parseInt(current.cloudcover),
+        dew_point: current.DewPointF ? parseFloat(current.DewPointF) : null,
+      
+      units: {
+          temperature: "°F",
+          distance: "miles",
+          speed: "mph",
+          pressure: "mb"
+        }
+
       };
 
     default:
@@ -126,6 +141,17 @@ export const weatherTool = new Tool({
   outputSchema: {
     type: 'object',
     properties: {
+      
+      feels_like: { type: 'number', description: 'Feels like temperature in °F' },
+      humidity: { type: 'number', description: 'Humidity %' },
+      uv_index: { type: 'number', description: 'UV index level' },
+      visibility: { type: 'number', description: 'Visibility in miles' },
+      pressure: { type: 'number', description: 'Atmospheric pressure (mb)' },
+      cloud_cover: { type: 'number', description: 'Cloud cover %' },
+      dew_point: { type: 'number', description: 'Dew point in °F' },
+      moonrise: { type: 'string', description: 'Time of moonrise' },
+      moonset: { type: 'string', description: 'Time of moonset' },
+      moon_phase: { type: 'string', description: 'Phase of the moon' },
       summary: { type: 'string' },
       temp_high: { type: 'number' },
       temp_low: { type: 'number' },
@@ -148,7 +174,17 @@ export const weatherTool = new Tool({
       },
       will_rain: { type: 'boolean' },
       rain_start: { type: 'string' },
-      rain_end: { type: 'string' }
+      rain_end: { type: 'string' },
+      units: {
+        type: 'object',
+        description: 'Units used in the returned weather data',
+        properties: {
+          temperature: { type: 'string', description: 'Temperature unit (e.g., °F, °C)' },
+          distance: { type: 'string', description: 'Distance unit (e.g., miles, km)' },
+          speed: { type: 'string', description: 'Speed unit (e.g., mph, km/h)' },
+          pressure: { type: 'string', description: 'Pressure unit (e.g., mb, hPa)' }
+        }
+      }
     }
   },
 
