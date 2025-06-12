@@ -4,14 +4,6 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-  McpError,
-  ErrorCode
-} from '@modelcontextprotocol/sdk/types.js';
-
 import { weatherTool } from './tools/weatherTool.js';
 import { handleSummarizeEmail } from './tools/summarizeTool.js';
 import { checkApiKey } from './utils/auth.js';
@@ -22,86 +14,58 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
 
-// Handle direct tool calls (for n8n integration)
+// Add logging middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  console.log('📦 Tool input:', req.body);
+  next();
+});
+
+// Handle all POST requests to root
 app.post('/', async (req, res) => {
   try {
-    console.log('📦 Tool input:', req.body);
+    const body = req.body;
+    let toolName;
+    let parameters;
     
-    // Handle direct tool calls
-    if (req.body.tool || req.body.name) {
-      const toolName = req.body.tool || req.body.name;
-      const parameters = req.body.parameters || req.body.arguments || req.body;
-      
-      let result;
-      
-      switch (toolName) {
-        case 'weatherTool':
-          result = await weatherTool.run(parameters, req, { checkApiKey });
-          break;
-          
-        case 'summarize_email':
-          result = await handleSummarizeEmail(parameters, req);
-          break;
-          
-        default:
-          // If no tool specified, assume it's a weather request
-          if (parameters.location || parameters.query_type) {
-            result = await weatherTool.run(parameters, req, { checkApiKey });
-          } else {
-            throw new Error(`Unknown tool: ${toolName}`);
-          }
-      }
-      
-      console.log('🌦 MCP WeatherTool responded:', result);
-      res.json(result);
-      return;
-    }
-    
-    // Handle MCP protocol requests
-    const { method, params } = req.body;
-    
-    if (method === 'tools/list') {
-      res.json({
-        tools: [
-          {
-            name: 'weatherTool',
-            description: weatherTool.description,
-            inputSchema: weatherTool.inputSchema
-          },
-          {
-            name: 'summarize_email',
-            description: 'Summarizes an email into one sentence',
-            inputSchema: {
-              type: 'object',
-              properties: {
-                emailText: { type: 'string' }
-              },
-              required: ['emailText']
-            }
-          }
-        ]
-      });
-    } else if (method === 'tools/call') {
-      const { name, arguments: args } = params;
-      let result;
-      
-      switch (name) {
-        case 'weatherTool':
-          result = await weatherTool.run(args, req, { checkApiKey });
-          break;
-          
-        case 'summarize_email':
-          result = await handleSummarizeEmail(args, req);
-          break;
-          
-        default:
-          throw new Error(`Tool not found: ${name}`);
-      }
-      
-      res.json({ content: [{ type: 'text', text: JSON.stringify(result) }] });
+    // Handle different request formats
+    if (body.type === 'call-tool') {
+      // Format: {"type": "call-tool", "tool_id": "weatherTool", "input": {...}}
+      toolName = body.tool_id;
+      parameters = body.input;
+    } else if (body.tool) {
+      // Format: {"tool": "weatherTool", "parameters": {...}}
+      toolName = body.tool;
+      parameters = body.parameters;
+    } else if (body.method === 'tools/call') {
+      // MCP format: {"method": "tools/call", "params": {"name": "weatherTool", "arguments": {...}}}
+      toolName = body.params.name;
+      parameters = body.params.arguments;
     } else {
-      res.status(400).json({ error: 'Unsupported method', method: method });
+      // Direct parameters: {"location": "New York", "query_type": "current"}
+      toolName = 'weatherTool'; // default
+      parameters = body;
     }
+    
+    console.log(`🛠 Calling tool: ${toolName} with parameters:`, parameters);
+    
+    let result;
+    
+    switch (toolName) {
+      case 'weatherTool':
+        result = await weatherTool.run(parameters, req, { checkApiKey });
+        break;
+        
+      case 'summarize_email':
+        result = await handleSummarizeEmail(parameters, req);
+        break;
+        
+      default:
+        throw new Error(`Unknown tool: ${toolName}`);
+    }
+    
+    console.log('🌦 MCP WeatherTool responded:', result);
+    res.json(result);
     
   } catch (err) {
     console.error('❌ MCP server error:', err);
@@ -115,25 +79,27 @@ app.get('/.well-known/tool-manifest.json', (req, res) => {
     tools: [
       {
         name: 'weatherTool',
-        description: weatherTool.description,
-        parameters: weatherTool.inputSchema
-      },
-      {
-        name: 'summarize_email',
-        description: 'Summarizes an email into one sentence',
+        description: 'Provides current weather, forecasts, and timing for rain/sun events based on location and date.',
         parameters: {
           type: 'object',
           properties: {
-            emailText: { type: 'string' }
+            location: { type: 'string', description: 'City name or ZIP/postal code' },
+            date: { type: 'string', format: 'date', description: 'Target date (YYYY-MM-DD)' },
+            query_type: {
+              type: 'string',
+              enum: ['current', 'forecast', 'multi_day', 'sunrise_sunset', 'rain_check'],
+              description: 'The type of weather query to run'
+            },
+            num_days: { type: 'integer', description: 'Number of days (for multi_day)' }
           },
-          required: ['emailText']
+          required: ['location', 'query_type']
         }
       }
     ]
   });
 });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ MCP server running at http://localhost:${PORT}/`);
 });

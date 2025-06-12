@@ -92,30 +92,37 @@ async function fetchWeatherData({ location, date, query_type, num_days = 3 }) {
 }
 
 
-
-// ✅ Exported tool
 export const weatherTool = new Tool({
   name: 'weatherTool',
-  description: 'Provides current weather, forecasts, and timing for rain/sun events based on location and date.',
+  description: 'Provides current weather, forecasts, and timing for rain or sun events based on location and date. Choose a query type to get either the current weather, a multi-day forecast, a single-day forecast, or check for sunrise/sunset or rain windows.',
+
   inputSchema: {
     type: 'object',
     properties: {
-      location: { type: 'string', description: 'City name or ZIP/postal code' },
-      date: { type: 'string', format: 'date', description: 'Target date (YYYY-MM-DD)' },
+      location: {
+        type: 'string',
+        description: 'City name, ZIP/postal code, or place name (e.g. "Boca Raton")'
+      },
+      date: {
+        type: 'string',
+        format: 'date',
+        description: 'Target date (YYYY-MM-DD). Required for query types: "forecast", "sunrise_sunset", or "rain_check"'
+      },
       query_type: {
         type: 'string',
         enum: ['current', 'forecast', 'multi_day', 'sunrise_sunset', 'rain_check'],
-        description: 'Type of weather query'
+        description: 'Type of weather query. "current" for now, "multi_day" for several days, "sunrise_sunset" for timing, etc.'
       },
       num_days: {
         type: 'integer',
         minimum: 1,
         maximum: 14,
-        description: 'Number of forecast days to return (only for multi_day)'
+        description: 'Number of days to return (only used with "multi_day")'
       }
     },
     required: ['location', 'query_type']
-  },  
+  },
+
   outputSchema: {
     type: 'object',
     properties: {
@@ -144,8 +151,9 @@ export const weatherTool = new Tool({
       rain_end: { type: 'string' }
     }
   },
-  run: async (input) => {
-    console.log('[WeatherTool] Input:', input);
-    return await fetchWeatherData(input);
+
+  run: async (input, req) => {
+    console.log('[weatherTool] Input received:', input);
+    return await fetchWeatherData(input); // You handle the logic here
   }
 });
