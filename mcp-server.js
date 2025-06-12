@@ -57,13 +57,10 @@ app.post('/', async (req, res) => {
               jsonrpc: '2.0',
               id: body.id,
               result: {
-                content: [
-                  {
-                    type: 'text',
-                    text: JSON.stringify(result, null, 2),
-                  },
-                ],
-              },
+                toolUseId: body.id,
+                isFinal: true,
+                output: result
+              }
             });
           } catch (error) {
             res.json({
