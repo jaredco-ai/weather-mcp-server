@@ -52,6 +52,11 @@ app.post('/', async (req, res) => {
           
         case 'tools/call':
           try {
+            const toolName = body.params.tool || body.params.name; // ✅ handles both formats
+            if (toolName !== 'weatherTool') {
+              throw new Error(`Tool not found: ${toolName}`);
+            }
+            
             const result = await weatherTool.run(body.params.arguments);
             res.json({
               jsonrpc: '2.0',

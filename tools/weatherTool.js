@@ -188,8 +188,16 @@ export const weatherTool = new Tool({
     }
   },
 
-  run: async (input, req) => {
-    console.log('[weatherTool] Input received:', input);
-    return await fetchWeatherData(input); // You handle the logic here
+  run: async (input) => {
+    console.log('[WeatherTool] Input:', input);
+  
+    try {
+      const result = await fetchWeatherData(input);
+      console.log('[WeatherTool] Result:', result); // ✅ add this
+      return result;
+    } catch (err) {
+      console.error('[WeatherTool] Error during fetch:', err);
+      throw new Error('Failed to fetch weather data.');
+    }
   }
 });
