@@ -1,75 +1,121 @@
 import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { weatherTool } from './tools/weatherTool.js';
-import { handleSummarizeEmail } from './tools/summarizeTool.js';
-import { checkApiKey } from './utils/auth.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
 
-// Add logging middleware
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  console.log('📦 Tool input:', req.body);
-  next();
-});
-
-// Handle all POST requests to root
+// Handle both MCP protocol and direct HTTP requests
 app.post('/', async (req, res) => {
   try {
+    console.log('📦 Request received:', req.body);
+    
     const body = req.body;
-    let toolName;
+    
+    // Check if this is an MCP protocol message
+    if (body.jsonrpc === '2.0' && body.method) {
+      console.log('🔌 MCP Protocol message detected');
+      
+      switch (body.method) {
+        case 'initialize':
+          res.json({
+            jsonrpc: '2.0',
+            id: body.id,
+            result: {
+              protocolVersion: '2025-03-26',
+              capabilities: {
+                tools: { listChanged: false },
+              },
+              serverInfo: {
+                name: 'weather-mcp-server',
+                version: '1.0.0',
+              },
+            },
+          });
+          return;
+          
+        case 'tools/list':
+          res.json({
+            jsonrpc: '2.0',
+            id: body.id,
+            result: {
+              tools: [
+                {
+                  name: 'weatherTool',
+                  description: weatherTool.description,
+                  inputSchema: weatherTool.inputSchema,
+                },
+              ],
+            },
+          });
+          return;
+          
+        case 'tools/call':
+          try {
+            const result = await weatherTool.run(body.params.arguments);
+            res.json({
+              jsonrpc: '2.0',
+              id: body.id,
+              result: {
+                content: [
+                  {
+                    type: 'text',
+                    text: JSON.stringify(result, null, 2),
+                  },
+                ],
+              },
+            });
+          } catch (error) {
+            res.json({
+              jsonrpc: '2.0',
+              id: body.id,
+              error: {
+                code: -32603,
+                message: error.message,
+              },
+            });
+          }
+          return;
+          
+        default:
+          res.status(400).json({
+            jsonrpc: '2.0',
+            id: body.id,
+            error: {
+              code: -32601,
+              message: `Method not found: ${body.method}`,
+            },
+          });
+          return;
+      }
+    }
+    
+    // Handle direct tool calls (for n8n)
+    console.log('🌐 Direct HTTP request detected');
+    
     let parameters;
-    
-    // Handle different request formats
-    if (body.type === 'call-tool') {
-      // Format: {"type": "call-tool", "tool_id": "weatherTool", "input": {...}}
-      toolName = body.tool_id;
-      parameters = body.input;
-    } else if (body.tool) {
-      // Format: {"tool": "weatherTool", "parameters": {...}}
-      toolName = body.tool;
-      parameters = body.parameters;
-    } else if (body.method === 'tools/call') {
-      // MCP format: {"method": "tools/call", "params": {"name": "weatherTool", "arguments": {...}}}
-      toolName = body.params.name;
-      parameters = body.params.arguments;
-    } else {
-      // Direct parameters: {"location": "New York", "query_type": "current"}
-      toolName = 'weatherTool'; // default
+    if (body.location || body.query_type) {
+      // Direct parameters: {"location": "NYC", "query_type": "current"}
       parameters = body;
+    } else if (body.tool === 'weatherTool' || body.tool_id === 'weatherTool') {
+      // Tool wrapper: {"tool": "weatherTool", "parameters": {...}}
+      parameters = body.parameters || body.input;
+    } else if (body.type === 'call-tool') {
+      // Test script format: {"type": "call-tool", "tool_id": "weatherTool", "input": {...}}
+      parameters = body.input;
+    } else {
+      throw new Error(`Invalid request format. Expected MCP protocol or direct tool call.`);
     }
     
-    console.log(`🛠 Calling tool: ${toolName} with parameters:`, parameters);
-    
-    let result;
-    
-    switch (toolName) {
-      case 'weatherTool':
-        result = await weatherTool.run(parameters, req, { checkApiKey });
-        break;
-        
-      case 'summarize_email':
-        result = await handleSummarizeEmail(parameters, req);
-        break;
-        
-      default:
-        throw new Error(`Unknown tool: ${toolName}`);
-    }
-    
-    console.log('🌦 MCP WeatherTool responded:', result);
+    const result = await weatherTool.run(parameters);
+    console.log('🌦 Weather result:', result);
     res.json(result);
     
-  } catch (err) {
-    console.error('❌ MCP server error:', err);
-    res.status(500).json({ error: 'Server error', details: err.message });
+  } catch (error) {
+    console.error('❌ Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      type: 'server_error'
+    });
   }
 });
 
@@ -79,27 +125,15 @@ app.get('/.well-known/tool-manifest.json', (req, res) => {
     tools: [
       {
         name: 'weatherTool',
-        description: 'Provides current weather, forecasts, and timing for rain/sun events based on location and date.',
-        parameters: {
-          type: 'object',
-          properties: {
-            location: { type: 'string', description: 'City name or ZIP/postal code' },
-            date: { type: 'string', format: 'date', description: 'Target date (YYYY-MM-DD)' },
-            query_type: {
-              type: 'string',
-              enum: ['current', 'forecast', 'multi_day', 'sunrise_sunset', 'rain_check'],
-              description: 'The type of weather query to run'
-            },
-            num_days: { type: 'integer', description: 'Number of days (for multi_day)' }
-          },
-          required: ['location', 'query_type']
-        }
-      }
-    ]
+        description: weatherTool.description,
+        parameters: weatherTool.inputSchema,
+      },
+    ],
   });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ MCP server running at http://localhost:${PORT}/`);
+  console.log(`🔌 Supports both MCP protocol and direct HTTP calls`);
 });
