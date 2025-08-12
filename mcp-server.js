@@ -176,6 +176,20 @@ app.post('/', async (req, res) => {
   }
 });
 
+// Serve Claude-compatible MCP manifest
+app.get('/.well-known/mcp/manifest', (req, res) => {
+  res.json({
+    tools: [
+      {
+        name: 'weatherTool',
+        description: weatherTool.description,
+        parameters: weatherTool.inputSchema,
+        output: weatherTool.outputSchema
+      }
+    ]
+  });
+});
+
 // Serve tool manifest
 app.get('/.well-known/tool-manifest.json', (req, res) => {
   res.json({
