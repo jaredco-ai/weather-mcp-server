@@ -56,8 +56,10 @@ export const weatherPlanningTool = new Tool({
       // Add provenance metadata
       const enrichedResult = {
         ...result,
-        source: 'World Weather Online',
-        generated_at: new Date().toISOString()
+        provenance: {
+          source: 'World Weather Online',
+          generated_at: new Date().toISOString()
+        }
       };
 
       console.log('[WeatherPlanningTool] Result:', enrichedResult);

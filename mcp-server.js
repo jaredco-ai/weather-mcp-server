@@ -152,7 +152,7 @@ app.post('/tools/weatherPlanningTool', async (req, res) => {
 
     return res.json(output);
   } catch (e) {
-    console.error('Direct call error:', e);
+    console.error('Direct planning tool call error:', e);
     return resErr(res, 500, 'INTERNAL_ERROR', e?.message || 'Unexpected server error');
   }
 });
@@ -287,7 +287,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ WeatherTrax MCP server on http://localhost:${PORT}/`);
   console.log(`   • Manifest: /.well-known/mcp/manifest & /.well-known/tool-manifest.json`);
-  console.log(`   • Direct tool: POST /tools/weatherTool`);
+  console.log(`   • Direct tools: POST /tools/weatherTool & POST /tools/weatherPlanningTool`);
   console.log(`   • MCP JSON-RPC: POST /`);
   console.log(`   • Health: /healthz`);
 });
