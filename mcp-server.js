@@ -145,8 +145,17 @@ app.get('/', (_req, res) => {
     `<h1>WeatherTrax MCP</h1>
      <p>JSON‑RPC: POST / & POST /mcp</p>
      <p>Manifest: <a href="/.well-known/mcp/manifest">/.well-known/mcp/manifest</a></p>
-     <p>Docs: <a href="https://github.com/jaredco-ai/weathertrax-mcp-agent-demo">GitHub</a></p>`
+     <p>Docs: <a href="https://github.com/jaredco-ai/weather-mcp-server">GitHub</a></p>`
   );
+});
+
+/* ---------- Logo & Favicon ---------- */
+app.get('/logo.svg', (_req, res) => {
+  res.sendFile(join(__dirname, 'public', 'weathertrax-logo.svg'));
+});
+
+app.get('/favicon.ico', (_req, res) => {
+  res.sendFile(join(__dirname, 'public', 'weathertrax-logo.svg'));
 });
 
 
