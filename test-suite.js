@@ -4,6 +4,8 @@
 // Tests legacy endpoints, MCP protocol, origin validation, and new features
 
 import fetch from 'node-fetch';
+import { fileURLToPath } from 'url';
+import { resolve } from 'path';
 
 const BASE_URL = process.env.TEST_URL || 'http://localhost:3000';
 const COLORS = {
@@ -112,9 +114,9 @@ async function testLegacyEndpoints() {
     });
     const data = await response.json();
     await assert(response.status === 200, 'Response status is 200');
-    await assert(data.summary !== undefined, 'Response contains summary');
     await assert(Array.isArray(data.forecast), 'Response contains forecast array');
     await assert(data.forecast.length === 3, 'Forecast has 3 days');
+    await assert(data.forecast[0].date !== undefined, 'Forecast items have date field');
     log(`    Forecast days: ${data.forecast.length}`, 'blue');
   } catch (error) {
     log(`    Error: ${error.message}`, 'red');
@@ -137,9 +139,10 @@ async function testLegacyEndpoints() {
     });
     const data = await response.json();
     await assert(response.status === 200, 'Response status is 200');
-    await assert(data.summary !== undefined, 'Response contains summary');
-    await assert(data.location !== undefined, 'Response contains location');
-    log(`    Location: ${data.location}`, 'blue');
+    await assert(Array.isArray(data.forecast), 'Response contains forecast array');
+    await assert(data.provenance !== undefined, 'Response contains provenance');
+    await assert(data.forecast.length >= 5, 'Planning tool returns multi-day forecast (5+ days)');
+    log(`    Forecast days: ${data.forecast.length}`, 'blue');
   } catch (error) {
     log(`    Error: ${error.message}`, 'red');
   }
@@ -286,7 +289,9 @@ async function testMcpProtocol() {
     const data = await response.json();
     await assert(response.status === 200, 'Response status is 200');
     await assert(data.result?.output !== undefined, 'Response contains output');
-    await assert(data.result.output.summary !== undefined, 'Output contains planning summary');
+    await assert(data.result.output.structuredContent !== undefined, 'Output contains structuredContent');
+    await assert(Array.isArray(data.result.output.structuredContent.forecast), 'StructuredContent contains forecast array');
+    await assert(data.result.output.structuredContent.provenance !== undefined, 'StructuredContent contains provenance');
     log(`    Planning tool works correctly`, 'blue');
   } catch (error) {
     log(`    Error: ${error.message}`, 'red');
@@ -692,7 +697,9 @@ async function runAllTests() {
 }
 
 // Run tests if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+const currentFile = fileURLToPath(import.meta.url);
+const executedFile = resolve(process.argv[1]);
+if (currentFile === executedFile) {
   runAllTests();
 }
 

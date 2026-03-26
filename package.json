@@ -1,10 +1,32 @@
 {
-  "name": "mcp-railway-server",
+  "name": "weather-mcp-server",
+  "version": "1.0.0",
+  "description": "Fast current conditions and multi-day forecasts by city or lat/long. MCP-compliant weather server for Claude and other AI assistants.",
   "type": "module",
+  "main": "mcp-server.js",
   "scripts": {
     "start": "node mcp-server.js",
     "test": "node quick-test.js",
     "test:full": "node test-suite.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jaredco-ai/weather-mcp-server.git"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "weather",
+    "claude",
+    "anthropic",
+    "api",
+    "forecast"
+  ],
+  "author": "JaredCo",
+  "license": "MIT",
+  "homepage": "https://github.com/jaredco-ai/weather-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/jaredco-ai/weather-mcp-server/issues"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
