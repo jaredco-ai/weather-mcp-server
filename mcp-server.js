@@ -115,9 +115,9 @@ const manifest = {
   version: '1.0.0',
   description:
     'Fast current conditions and multi‑day forecasts by city or lat/long. Token‑frugal JSON with clear, structured errors.',
-  homepage_url: 'https://github.com/jaredco-ai/weather-mcp-server',
+  homepage_url: 'https://github.com/jaredco/weather-mcp-server',
   legal: { privacy_policy_url: 'https://mcp-weathertrax.jaredco.com/privacy' },
-  contact: { support_url: 'https://github.com/jaredco-ai/weather-mcp-server/issues' },
+  contact: { support_url: 'https://github.com/jaredco/weather-mcp-server/issues' },
   transport: { http: { streaming: true } },
   tools: [
     {

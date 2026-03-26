@@ -86,10 +86,10 @@ npm run test:full  # Full suite (67 tests)
 - [x] .gitignore properly configured
 - [x] GitHub Issues enabled for support
 
-**Repository:** https://github.com/jaredco-ai/weather-mcp-server
+**Repository:** https://github.com/jaredco/weather-mcp-server
 
 ### 8. Support Channels ✅
-- [x] GitHub Issues: https://github.com/jaredco-ai/weather-mcp-server/issues
+- [x] GitHub Issues: https://github.com/jaredco/weather-mcp-server/issues
 - [x] Email: support@jaredco.com (backup)
 - [x] Response commitment documented
 
@@ -125,10 +125,10 @@ Includes specialized planning tool for construction, events, and outdoor work.
 ```
 
 **3. Documentation Links**
-- **README:** https://github.com/jaredco-ai/weather-mcp-server#readme
-- **API Docs:** https://github.com/jaredco-ai/weather-mcp-server#-api-documentation
+- **README:** https://github.com/jaredco/weather-mcp-server#readme
+- **API Docs:** https://github.com/jaredco/weather-mcp-server#-api-documentation
 - **Privacy Policy:** https://mcp-weathertrax.jaredco.com/privacy
-- **Examples:** https://github.com/jaredco-ai/weather-mcp-server#-usage-examples
+- **Examples:** https://github.com/jaredco/weather-mcp-server#-usage-examples
 
 **4. Tools Provided**
 1. **weatherTool** - Current conditions and multi-day forecasts (1-14 days)
@@ -158,7 +158,7 @@ curl -X POST https://mcp-weathertrax.jaredco.com/tools/weatherPlanningTool \
 ```
 
 **6. Contact Information**
-- **Primary:** GitHub Issues - https://github.com/jaredco-ai/weather-mcp-server/issues
+- **Primary:** GitHub Issues - https://github.com/jaredco/weather-mcp-server/issues
 - **Email:** support@jaredco.com
 - **Response Time:** Within 2 business days
 
@@ -207,10 +207,10 @@ curl -X POST https://mcp-weathertrax.jaredco.com/mcp \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
 
 # 7. Verify GitHub Issues are enabled
-# Visit: https://github.com/jaredco-ai/weather-mcp-server/issues
+# Visit: https://github.com/jaredco/weather-mcp-server/issues
 
 # 8. Verify README is complete
-# Visit: https://github.com/jaredco-ai/weather-mcp-server#readme
+# Visit: https://github.com/jaredco/weather-mcp-server#readme
 ```
 
 ### Local Repository Checks

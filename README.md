@@ -460,7 +460,7 @@ We take your privacy seriously. Our privacy policy is available at:
 
 ### Support
 
-- **GitHub Issues:** https://github.com/jaredco-ai/weather-mcp-server/issues
+- **GitHub Issues:** https://github.com/jaredco/weather-mcp-server/issues
 - **Email:** support@jaredco.com
 
 ### Security
@@ -478,7 +478,7 @@ We take your privacy seriously. Our privacy policy is available at:
 
 ```bash
 # Clone repository
-git clone https://github.com/jaredco-ai/weather-mcp-server.git
+git clone https://github.com/jaredco/weather-mcp-server.git
 cd weather-mcp-server
 
 # Install dependencies

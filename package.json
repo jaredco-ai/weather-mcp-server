@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jaredco-ai/weather-mcp-server.git"
+    "url": "https://github.com/jaredco/weather-mcp-server.git"
   },
   "keywords": [
     "mcp",
@@ -24,9 +24,9 @@
   ],
   "author": "JaredCo",
   "license": "MIT",
-  "homepage": "https://github.com/jaredco-ai/weather-mcp-server#readme",
+  "homepage": "https://github.com/jaredco/weather-mcp-server#readme",
   "bugs": {
-    "url": "https://github.com/jaredco-ai/weather-mcp-server/issues"
+    "url": "https://github.com/jaredco/weather-mcp-server/issues"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
