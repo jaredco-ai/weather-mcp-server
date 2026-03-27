@@ -2,6 +2,8 @@
 
 Fast, reliable weather data for Claude and other MCP clients. Get current conditions and multi-day forecasts for any location worldwide.
 
+npx @jaredco/weather-mcp-server
+
 **Production Server:** [`https://mcp-weathertrax.jaredco.com`](https://mcp-weathertrax.jaredco.com)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)

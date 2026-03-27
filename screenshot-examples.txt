@@ -1,0 +1,258 @@
+=== Example 1: Current Weather Query ===
+
+USER:
+What's the weather like in San Francisco right now?
+
+CLAUDE RESPONSE:
+{
+    "summary": "It is currently 51°F and Partly cloudy in San Francisco, CA.",
+    "temp_high": 51,
+    "temp_low": 51,
+    "condition": "Partly cloudy",
+    "wind": "4 mph NNE",
+    "feels_like": 50,
+    "humidity": 79,
+    "uv_index": 1,
+    "visibility": 16,
+    "pressure": 1019,
+    "cloud_cover": 75,
+    "units": {
+        "temperature": "°F",
+        "distance": "miles",
+        "speed": "mph",
+        "pressure": "mb"
+    }
+}
+
+
+================================================================================
+
+
+=== Example 2: Multi-Day Forecast ===
+
+USER:
+I'm visiting New York City this week. Can you give me a 5-day weather forecast?
+
+CLAUDE RESPONSE:
+{
+    "forecast": [
+        {
+            "date": "2026-03-26",
+            "high": 80,
+            "low": 42,
+            "condition": "Patchy rain nearby",
+            "precip_chance": 0.8,
+            "wind": "20 mph SSW",
+            "sunrise": "06:49 AM",
+            "sunset": "07:15 PM"
+        },
+        {
+            "date": "2026-03-27",
+            "high": 56,
+            "low": 38,
+            "condition": "Moderate rain",
+            "precip_chance": 0.7,
+            "wind": "22 mph SW",
+            "sunrise": "06:48 AM",
+            "sunset": "07:16 PM"
+        },
+        {
+            "date": "2026-03-28",
+            "high": 38,
+            "low": 29,
+            "condition": "Cloudy ",
+            "precip_chance": 0,
+            "wind": "18 mph NNW",
+            "sunrise": "06:46 AM",
+            "sunset": "07:17 PM"
+        },
+        {
+            "date": "2026-03-29",
+            "high": 51,
+            "low": 27,
+            "condition": "Sunny",
+            "precip_chance": 0,
+            "wind": "16 mph SW",
+            "sunrise": "06:44 AM",
+            "sunset": "07:18 PM"
+        },
+        {
+            "date": "2026-03-30",
+            "high": 57,
+            "low": 44,
+            "condition": "Patchy rain nearby",
+            "precip_chance": 0.77,
+            "wind": "16 mph SW",
+            "sunrise": "06:43 AM",
+            "sunset": "07:19 PM"
+        }
+    ]
+}
+
+
+================================================================================
+
+
+=== Example 3: Event Planning ===
+
+USER:
+I'm planning an outdoor wedding in Miami next weekend. Can you help me understand what weather to expect?
+
+CLAUDE RESPONSE:
+{
+    "forecast": [
+        {
+            "date": "2026-03-26",
+            "high": 86,
+            "low": 64,
+            "condition": "Sunny",
+            "precip_chance": 0,
+            "wind": "14 mph E",
+            "sunrise": "07:18 AM",
+            "sunset": "07:35 PM"
+        },
+        {
+            "date": "2026-03-27",
+            "high": 77,
+            "low": 70,
+            "condition": "Partly Cloudy ",
+            "precip_chance": 0,
+            "wind": "13 mph E",
+            "sunrise": "07:17 AM",
+            "sunset": "07:36 PM"
+        },
+        {
+            "date": "2026-03-28",
+            "high": 78,
+            "low": 72,
+            "condition": "Partly Cloudy ",
+            "precip_chance": 0,
+            "wind": "16 mph ENE",
+            "sunrise": "07:16 AM",
+            "sunset": "07:36 PM"
+        },
+        {
+            "date": "2026-03-29",
+            "high": 76,
+            "low": 73,
+            "condition": "Moderate rain",
+            "precip_chance": 0.79,
+            "wind": "23 mph E",
+            "sunrise": "07:15 AM",
+            "sunset": "07:37 PM"
+        },
+        {
+            "date": "2026-03-30",
+            "high": 77,
+            "low": 73,
+            "condition": "Moderate rain",
+            "precip_chance": 0.81,
+            "wind": "22 mph E",
+            "sunrise": "07:14 AM",
+            "sunset": "07:37 PM"
+        }
+    ],
+    "provenance": {
+        "source": "World Weather Online",
+        "generated_at": "2026-03-26T16:05:09.392Z"
+    }
+}
+
+
+================================================================================
+
+
+=== Example 4: Simple International Query ===
+
+USER:
+What's the current weather in London?
+
+CLAUDE RESPONSE:
+{
+    "summary": "It is currently 50°F and Partly Cloudy in London, UK.",
+    "temp_high": 50,
+    "temp_low": 50,
+    "condition": "Partly Cloudy ",
+    "wind": "9 mph NNW",
+    "feels_like": 47,
+    "humidity": 37,
+    "uv_index": 1,
+    "visibility": 10,
+    "pressure": 1022,
+    "cloud_cover": 0,
+    "units": {
+        "temperature": "°F",
+        "distance": "miles",
+        "speed": "mph",
+        "pressure": "mb"
+    }
+}
+
+
+================================================================================
+
+
+=== Example 5: Construction Scheduling ===
+
+USER:
+I need to schedule construction work in Denver over the next 7 days. Which days would be best based on weather conditions?
+
+CLAUDE RESPONSE:
+{
+    "forecast": [
+        {
+            "date": "2026-03-26",
+            "high": 62,
+            "low": 38,
+            "condition": "Sunny",
+            "precip_chance": 0,
+            "wind": "8 mph SW",
+            "sunrise": "06:58 AM",
+            "sunset": "07:32 PM"
+        },
+        {
+            "date": "2026-03-27",
+            "high": 52,
+            "low": 35,
+            "condition": "Rain showers",
+            "precip_chance": 0.65,
+            "wind": "12 mph NW",
+            "sunrise": "06:56 AM",
+            "sunset": "07:33 PM"
+        },
+        {
+            "date": "2026-03-28",
+            "high": 58,
+            "low": 32,
+            "condition": "Sunny",
+            "precip_chance": 0,
+            "wind": "12 mph W",
+            "sunrise": "06:55 AM",
+            "sunset": "07:34 PM"
+        },
+        {
+            "date": "2026-03-29",
+            "high": 60,
+            "low": 36,
+            "condition": "Windy",
+            "precip_chance": 0.10,
+            "wind": "25 mph SW",
+            "sunrise": "06:53 AM",
+            "sunset": "07:35 PM"
+        },
+        {
+            "date": "2026-03-30",
+            "high": 60,
+            "low": 38,
+            "condition": "Partly cloudy",
+            "precip_chance": 0.10,
+            "wind": "10 mph W",
+            "sunrise": "06:51 AM",
+            "sunset": "07:36 PM"
+        }
+    ],
+    "provenance": {
+        "source": "World Weather Online",
+        "generated_at": "2026-03-26T16:15:22.108Z"
+    }
+}
