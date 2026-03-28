@@ -34,7 +34,7 @@ async function fetchWithRetry(url, retries = 1, delay = 1000) {
   }
 }
 
-async function fetchWeatherData({ location, date, query_type, num_days = 3 }) {
+async function fetchWeatherData({ location, date, query_type, num_days = 3, tp = 24 }) {
   if (!location || !query_type) {
     throw new McpError(ErrorCode.BAD_REQUEST, 'Missing required parameter: location or query_type');
   }
@@ -48,7 +48,7 @@ async function fetchWeatherData({ location, date, query_type, num_days = 3 }) {
     q: location,
     format: 'json',
     num_of_days: query_type === 'multi_day' ? num_days.toString() : '1',
-    tp: input.tp ? input.tp.toString() : '24',
+    tp: input.tp = tp.toString() : '24',
     includeLocation: 'yes',
     fx: 'yes',
     showlocaltime: 'yes'
