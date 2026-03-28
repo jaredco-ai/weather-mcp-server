@@ -71,7 +71,7 @@ async function fetchWeatherData({ location, date, query_type, num_days = 3, tp =
   const current = data.data.current_condition?.[0];
 
   switch (query_type) {
-    case 'multi_day':
+   case 'multi_day':
       return {
         forecast: dayData.map(d => ({
           date: d.date,
@@ -81,7 +81,19 @@ async function fetchWeatherData({ location, date, query_type, num_days = 3, tp =
           precip_chance: parseFloat(d.hourly[0].chanceofrain) / 100,
           wind: `${d.hourly[0].windspeedMiles} mph ${d.hourly[0].winddir16Point}`,
           sunrise: d.astronomy?.[0]?.sunrise,
-          sunset: d.astronomy?.[0]?.sunset
+          sunset: d.astronomy?.[0]?.sunset,
+          hourly: tp < 24 ? d.hourly.map(h => ({
+            time: h.time,
+            temp: parseFloat(h.tempF),
+            condition: h.weatherDesc[0].value,
+            wind: `${h.windspeedMiles} mph ${h.winddir16Point}`,
+            precip_chance: parseFloat(h.chanceofrain) / 100,
+            visibility: parseInt(h.visibilityMiles),
+            cloud_cover: parseInt(h.cloudcover),
+            humidity: parseInt(h.humidity),
+            chance_of_fog: parseInt(h.chanceoffog),
+            chance_of_thunder: parseInt(h.chanceofthunder)
+          })) : undefined
         }))
       };
 
